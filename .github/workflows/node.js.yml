@@ -27,7 +27,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: echo "ts-node version = $(ts-node --version)"
+    - run: echo "ts-node version = $(npx ts-node --version)"
     - run: npm run dev
 
     - name: Get current date

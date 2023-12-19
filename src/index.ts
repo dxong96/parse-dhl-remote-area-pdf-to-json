@@ -2,9 +2,9 @@ import {Readable} from "stream";
 import {writeFileSync, createWriteStream} from "fs";
 import {readFile} from "fs/promises";
 import axios from "axios";
-import {countriesStateCityUrl, dhlPdfUrl} from "../config.js";
+import {countriesStateCityUrl, dhlPdfUrl} from "./config.js";
 import {PdfReader} from "pdfreader";
-import {cityNames, stateNames} from "../countries.js";
+import {cityNames, stateNames} from "./countries.js";
 
 interface State {
   dhlPdfEtag: string;

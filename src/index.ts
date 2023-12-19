@@ -5,18 +5,8 @@ import axios from "axios";
 import {countriesStateCityUrl, dhlPdfUrl} from "./config.js";
 import {PdfReader} from "pdfreader";
 import {cityNames, stateNames} from "./countries.js";
+import {RemoteAreaItem, State} from "../types.js";
 
-interface State {
-  dhlPdfEtag: string;
-  countriesEtag: string;
-}
-
-interface RemoteAreaItem {
-  country: string;
-  cityOrState?: string;
-  zipRange?: string[];
-  zip?: string;
-}
 
 // patterns
 const textBlacklistUnderCountryHeader = [

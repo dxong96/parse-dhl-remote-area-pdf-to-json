@@ -37,6 +37,9 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       with:
+        add-paths: |
+            output.json
+            state.json
         commit-message: Data source updated generating new output
         committer: dxong96 <ongdexing@gmail.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>

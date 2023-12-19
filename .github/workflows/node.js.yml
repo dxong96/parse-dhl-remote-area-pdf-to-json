@@ -32,7 +32,7 @@ jobs:
 
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      run: echo "date=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
@@ -44,9 +44,9 @@ jobs:
         committer: dxong96 <ongdexing@gmail.com>
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         signoff: true
-        branch: auto/update_${{ steps.date.outputs.date }}
+        branch: auto/update_${{ env.date }}
         delete-branch: true
-        title: 'Check new update ${{ steps.date.outputs.date }}'
+        title: 'Check new update ${{ env.date }}'
         labels: |
           exports
           automated

@@ -1,7 +1,7 @@
 {
   "name": "parse-dhl-remote-area-pdf-to-json",
   "version": "1.0.0",
-  "description": "",
+  "description": "module that provides json for dhl remote areas",
   "main": "build/src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,5 +19,14 @@
   "devDependencies": {
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dxong96/parse-dhl-remote-area-pdf-to-json"
+  },
+  "keywords": [
+    "dhl",
+    "remote area",
+    "json"
+  ]
 }

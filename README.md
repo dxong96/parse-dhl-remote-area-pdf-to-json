@@ -14,3 +14,27 @@ interface RemoteAreaItem {
 ```
 
 Last generated on 20/12/2023 GMT+8
+
+## Installing
+
+### Package manager
+
+Using npm:
+
+```bash
+$ npm install axios
+```
+
+
+## Usage
+
+### ESM
+```ecmascript 6
+import countries from 'parse-dhl-remote-area-pdf-to-json';
+```
+
+### CommonJS
+
+```js
+const countries = require('parse-dhl-remote-area-pdf-to-json');
+```

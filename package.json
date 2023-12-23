@@ -1,6 +1,6 @@
 {
   "name": "parse-dhl-remote-area-pdf-to-json",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "module that provides json for dhl remote areas",
   "main": "./index.json",
   "module": "index.mjs",
@@ -9,8 +9,7 @@
       "import": {
         "types": "./types/commonjs/index.d.mts",
         "default": "./index.mjs"
-      }
-    ,
+      },
       "require": {
         "types": "./types/commonjs/index.d.cts",
         "default": "./index.json"

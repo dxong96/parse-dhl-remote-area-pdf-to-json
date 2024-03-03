@@ -1,4 +1,5 @@
-import {writeFileSync} from "fs";
+import {Readable} from "stream";
+import {createWriteStream, writeFileSync} from "fs";
 import {readFile} from "fs/promises";
 import axios from "axios";
 import {countriesStateCityUrl, dhlPdfUrl} from "./config.js";
@@ -107,26 +108,26 @@ console.log('countriesPdfChanged', countriesPdfChanged);
 console.log('shouldRun', shouldRun);
 
 if (shouldRun) {
-  // await new Promise<void>((resolve, reject) => {
-  //   axios.get<Readable>(dhlPdfUrl, {
-  //     responseType: 'stream',
-  //     headers: {
-  //       "User-Agent": 'curl/8.4.0'
-  //     }
-  //   })
-  //     .then(res => {
-  //       const writable = createWriteStream('dhl_express_remote_areas_en.pdf');
-  //       res.data.pipe(writable);
-  //       writable.on('finish', () => {
-  //         console.log('pipe finished');
-  //         resolve();
-  //       });
-  //     })
-  //     .catch(e => {
-  //       console.error(e);
-  //       reject(e);
-  //     });
-  // });
+  await new Promise<void>((resolve, reject) => {
+    axios.get<Readable>(dhlPdfUrl, {
+      responseType: 'stream',
+      headers: {
+        "User-Agent": 'curl/8.4.0'
+      }
+    })
+      .then(res => {
+        const writable = createWriteStream('dhl_express_remote_areas_en.pdf');
+        res.data.pipe(writable);
+        writable.on('finish', () => {
+          console.log('pipe finished');
+          resolve();
+        });
+      })
+      .catch(e => {
+        console.error(e);
+        reject(e);
+      });
+  });
   new PdfReader({}).parseFileItems("dhl_express_remote_areas_en.pdf", (err, item) => {
     if (err) {
       console.error("error:", err);

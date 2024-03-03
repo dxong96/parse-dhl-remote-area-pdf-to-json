@@ -72,7 +72,7 @@ const fallbackMapping = {
   'TAIWAN, CHINA': 'TW',
   'TÜRKİYE': 'TR',
   'TURKS & CAICOS ISLNDS.': 'TC',
-  'UNITED STATES, USA': 'USA'
+  'UNITED STATES, USA': 'US'
 };
 
 // output

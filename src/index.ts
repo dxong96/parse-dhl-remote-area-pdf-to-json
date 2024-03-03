@@ -1,12 +1,31 @@
-import {Readable} from "stream";
-import {writeFileSync, createWriteStream} from "fs";
+import {writeFileSync} from "fs";
 import {readFile} from "fs/promises";
 import axios from "axios";
 import {countriesStateCityUrl, dhlPdfUrl} from "./config.js";
 import {PdfReader} from "pdfreader";
 import {cityNames, stateNames} from "./countries.js";
 import {RemoteAreaItem, State} from "../types.js";
+import countries from "i18n-iso-countries";
 
+// interfaces
+interface CurrentCountry {
+  country: string;
+  iso: string | null;
+}
+
+// log config
+const logConfig = {
+  logCountryHeader: false,
+  logPage: true,
+  logUnmappedCountry: true,
+  logMatchCity: true,
+  logMatchState: true,
+  logMatchZipRange: true,
+  logMatchNoDigit: true,
+  logMatchNone: true,
+  logCurrentCell: false,
+  logOutput: false
+}
 
 // patterns
 const textBlacklistUnderCountryHeader = [
@@ -17,8 +36,43 @@ const rangeZipPattern = /([\d-]+) +- +([\d-]+)/;
 
 // state
 let foundRemoteCountryHeader = false;
-let currentCountry = '';
+let currentCountry: CurrentCountry = {
+  iso: null,
+  country: ''
+};
 let previousItemIsRemoteAreaListLabel = false;
+
+// local iso2 mapping
+const fallbackMapping = {
+  'BOSNIA &  HERZEGOVINA': 'BA',
+  'BRUNEI': 'BN',
+  'CANARY ISLANDS, THE': 'IC',
+  'CHINA, PEOPLE’S REP.': 'CN',
+  'CONGO, DEM. REP. OF': 'CD',
+  'COTE D’IVOIRE': 'CI',
+  'CZECH REPUBLIC, THE': 'CZ',
+  'FRENCH GUYANA': 'GF',
+  'GUINEA REPUBLIC': 'GN',
+  'GUINEA-EQUATORIAL': 'GQ',
+  'GUYANA (BRITISH)': 'GY',
+  'IRAN (ISLAMIC REP. OF)': 'IR',
+  'IRELAND, REPUBLIC OF': 'IE',
+  'KOREA, REP. OF (S. K.)': 'KR',
+  'KOREA, D.P.R OF (N. K.)': 'KP',
+  'LAO PEOPLE’S DEM. REP.': 'LA',
+  'MONTENEGRO, REP. OF': 'ME',
+  'PHILIPPINES, THE': 'PH',
+  'RUSSIAN FED., THE': 'RU',
+  'SERBIA, REPUBLIC OF': 'RS',
+  'ST. VINCENT': 'VC',
+  'SWAZILAND': 'SZ',
+  'SYRIA': 'SY',
+  'TIMOR LESTE': 'TL',
+  'TAIWAN, CHINA': 'TW',
+  'TÜRKİYE': 'TR',
+  'TURKS & CAICOS ISLNDS.': 'TC',
+  'UNITED STATES, USA': 'USA'
+};
 
 // output
 const output: RemoteAreaItem[] = [];
@@ -41,7 +95,8 @@ const countriesPdfEtag = await axios.head(countriesStateCityUrl)
   .then(res => {
     return res.headers["etag"] as string;
   });
-const dhlPdfChanged = state.dhlPdfEtag !== dhlPdfEtag;
+const dhlPdfChanged = true;
+// const dhlPdfChanged = state.dhlPdfEtag !== dhlPdfEtag;
 const countriesPdfChanged = state.countriesEtag !== countriesPdfEtag;
 const shouldRun = dhlPdfChanged || countriesPdfChanged;
 
@@ -52,26 +107,26 @@ console.log('countriesPdfChanged', countriesPdfChanged);
 console.log('shouldRun', shouldRun);
 
 if (shouldRun) {
-  await new Promise<void>((resolve, reject) => {
-    axios.get<Readable>(dhlPdfUrl, {
-      responseType: 'stream',
-      headers: {
-        "User-Agent": 'curl/8.4.0'
-      }
-    })
-      .then(res => {
-        const writable = createWriteStream('dhl_express_remote_areas_en.pdf');
-        res.data.pipe(writable);
-        writable.on('finish', () => {
-          console.log('pipe finished');
-          resolve();
-        });
-      })
-      .catch(e => {
-        console.error(e);
-        reject(e);
-      });
-  });
+  // await new Promise<void>((resolve, reject) => {
+  //   axios.get<Readable>(dhlPdfUrl, {
+  //     responseType: 'stream',
+  //     headers: {
+  //       "User-Agent": 'curl/8.4.0'
+  //     }
+  //   })
+  //     .then(res => {
+  //       const writable = createWriteStream('dhl_express_remote_areas_en.pdf');
+  //       res.data.pipe(writable);
+  //       writable.on('finish', () => {
+  //         console.log('pipe finished');
+  //         resolve();
+  //       });
+  //     })
+  //     .catch(e => {
+  //       console.error(e);
+  //       reject(e);
+  //     });
+  // });
   new PdfReader({}).parseFileItems("dhl_express_remote_areas_en.pdf", (err, item) => {
     if (err) {
       console.error("error:", err);
@@ -83,10 +138,10 @@ if (shouldRun) {
       };
       writeFileSync("state.json", JSON.stringify(newState), {encoding: 'utf8'});
       writeFileSync("output.json", JSON.stringify(output), {encoding: 'utf8'});
-      console.log(JSON.stringify(output));
+      logConfig.logOutput && console.log(JSON.stringify(output));
     } else if (item.page) {
       foundRemoteCountryHeader = false;
-      console.log('page:', item.page);
+      logConfig.logPage && console.log('page:', item.page);
     }
     else if (item.text) {
       if (item.text.includes('REMOTE AREA BY COUNTRY')) {
@@ -112,47 +167,56 @@ if (shouldRun) {
         }
 
         if (!/\d/.test(item.text) && item.text === item.text.toUpperCase()) {
-          currentCountry = item.text;
-          console.log('currentCountry:', item.text);
+          const iso = countries.getAlpha2Code(item.text, "en")
+            ?? fallbackMapping[item.text.trim()]
+            ?? null;
+          currentCountry = {
+            country: item.text,
+            iso
+          };
+          logConfig.logCountryHeader && console.log(`currentCountry map: ${item.text} to ${iso}`);
+          if (!iso) {
+            logConfig.logUnmappedCountry && console.log(`currentCountry not mapped: ${item.text}`);
+          }
           // do not process the country
           return;
         }
 
         if (cityNames.has(item.text.trim().toLowerCase())) {
-          console.log('match city name', item.text);
+          logConfig.logMatchCity&& console.log('match city name', item.text);
           output.push({
-            country: currentCountry,
+            ...currentCountry,
             cityOrState: item.text.trim()
           });
         } else if (stateNames.has(item.text.trim().toLowerCase())) {
-          console.log('match state name', item.text);
+          logConfig.logMatchState && console.log('match state name', item.text);
           output.push({
-            country: currentCountry,
+            ...currentCountry,
             cityOrState: item.text.trim()
           });
         } else if (rangeZipPattern.test(item.text)) {
-          console.log('match zip range', item.text);
+          logConfig.logMatchZipRange && console.log('match zip range', item.text);
           const matches = rangeZipPattern.exec(item.text);
           output.push({
-            country: currentCountry,
+            ...currentCountry,
             zipRange: matches.slice(1, 3)
           });
         } else if (!/\d/.test(item.text)) {
-          console.log('no digit found, likely city or state', item.text);
+          logConfig.logMatchNoDigit && console.log('no digit found, likely city or state', item.text);
           output.push({
-            country: currentCountry,
+            ...currentCountry,
             cityOrState: item.text.trim()
           });
         } else {
-          console.log('no match found, assign to zip', item.text);
+          logConfig.logMatchNone && console.log('no match found, assign to zip', item.text);
           output.push({
-            country: currentCountry,
+            ...currentCountry,
             zip: item.text.trim()
           });
         }
       }
       previousItemIsRemoteAreaListLabel = false;
-      // console.log('text:', item.text);
+      logConfig.logCurrentCell && console.log('text:', item.text);
     }
   });
 }

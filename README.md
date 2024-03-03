@@ -22,7 +22,7 @@ Last generated on 20/12/2023 GMT+8
 Using npm:
 
 ```bash
-$ npm install axios
+npm i parse-dhl-remote-area-pdf-to-json
 ```
 
 

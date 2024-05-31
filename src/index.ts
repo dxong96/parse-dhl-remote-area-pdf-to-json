@@ -33,7 +33,7 @@ const textBlacklistUnderCountryHeader = [
   /Effective date:/,
   /^\s*$/
 ];
-const rangeZipPattern = /(.+) +- +(.+)/;
+const rangeZipPattern = /([A-Z0-9 ]+) +- +([A-Z0-9 ]+)/;
 
 // state
 let foundRemoteCountryHeader = false;

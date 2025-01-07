@@ -72,7 +72,13 @@ const fallbackMapping = {
   'TAIWAN, CHINA': 'TW',
   'TÜRKİYE': 'TR',
   'TURKS & CAICOS ISLNDS.': 'TC',
-  'UNITED STATES, USA': 'US'
+  'UNITED STATES, USA': 'US',
+  'ANTIGUA': 'AG',
+  'BOSNIA & HERZEGOVINA': 'BA',
+  'CONGO, THE DEM. REP. OF': 'CD',
+  'IRAN (ISLAMIC REP.  OF)': 'IR',
+  'KOREA, REP. OF (S.  K.)': 'KR',
+  'TAHITI': 'PF'
 };
 
 // output

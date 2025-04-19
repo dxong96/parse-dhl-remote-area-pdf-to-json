@@ -38,3 +38,13 @@ import countries from 'parse-dhl-remote-area-pdf-to-json';
 ```js
 const countries = require('parse-dhl-remote-area-pdf-to-json');
 ```
+
+## Releasing
+```shell
+git show master:output.json > index.json
+echo "export default $(cat index.json);" > index.mjs
+git add index.*
+git commit -m "Update at $(date '+%d %b %Y')"
+npm version patch
+npm publish
+```

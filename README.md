@@ -13,7 +13,7 @@ interface RemoteAreaItem {
 }
 ```
 
-Last generated on 20/12/2023 GMT+8
+Last generated on 19/4/2025 GMT+8
 
 ## Installing
 

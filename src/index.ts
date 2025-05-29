@@ -7,6 +7,7 @@ import {PdfReader} from "pdfreader";
 import {cityNames, stateNames} from "./countries.js";
 import {RemoteAreaItem, State} from "../types.js";
 import countries from "i18n-iso-countries";
+import {findLongestPrefix, isNumeric} from "./utils.js";
 
 // interfaces
 interface CurrentCountry {
@@ -33,7 +34,7 @@ const textBlacklistUnderCountryHeader = [
   /Effective date:/,
   /^\s*$/
 ];
-const rangeZipPattern = /([A-Z0-9 ]+) +- +([A-Z0-9 ]+)/;
+const rangeZipPattern = /\s+-\s+/;
 
 // state
 let foundRemoteCountryHeader = false;
@@ -106,6 +107,22 @@ const dhlPdfChanged = true;
 // const dhlPdfChanged = state.dhlPdfEtag !== dhlPdfEtag;
 const countriesPdfChanged = state.countriesEtag !== countriesPdfEtag;
 const shouldRun = dhlPdfChanged || countriesPdfChanged;
+
+function isZipRangeValid(zipRange: string[]) {
+  if (isNumeric(zipRange[0]) && isNumeric(zipRange[1])) {
+    return true;
+  }
+
+  const prefix = findLongestPrefix(zipRange);
+  if (prefix) {
+    if (isNumeric(zipRange[0].substring(prefix.length)) &&
+      isNumeric(zipRange[1].substring(prefix.length))) {
+      return true;
+    }
+  }
+
+  return false;
+}
 
 console.log('dhlPdfEtag', dhlPdfEtag);
 console.log('countriesPdfEtag', countriesPdfEtag);
@@ -203,11 +220,19 @@ if (shouldRun) {
           });
         } else if (rangeZipPattern.test(item.text)) {
           logConfig.logMatchZipRange && console.log('match zip range', item.text);
-          const matches = rangeZipPattern.exec(item.text);
-          output.push({
-            ...currentCountry,
-            zipRange: matches.slice(1, 3)
-          });
+          const tokens = item.text.split(rangeZipPattern);
+          if (isZipRangeValid(tokens)) {
+            output.push({
+              ...currentCountry,
+              zipRange: tokens
+            });
+          } else {
+            // most like city or state
+            output.push({
+              ...currentCountry,
+              cityOrState: item.text.trim()
+            });
+          }
         } else if (!/\d/.test(item.text)) {
           logConfig.logMatchNoDigit && console.log('no digit found, likely city or state', item.text);
           output.push({

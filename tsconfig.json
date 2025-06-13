@@ -5,6 +5,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "rootDir": "./",
-    "outDir": "./build"
-  }
+    "outDir": "./build",
+    "importHelpers": true,
+    "declaration": true,
+    "declarationDir": "./build/dts"
+  },
+  "include": [
+    "./src/**/*.ts",
+  ]
 }

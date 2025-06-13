@@ -2,11 +2,16 @@
   "name": "parse-dhl-remote-area-pdf-to-json",
   "version": "1.0.0",
   "description": "module that provides json for dhl remote areas",
-  "main": "build/src/index.js",
+  "main": "build/index.js",
+  "exports": {
+    "import": "./build/index.mjs",
+    "require": "./build/index.cjs"
+  },
+  "types": "./build/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx src/index.ts",
-    "build": "tsc",
+    "dev": "tsx src/scraper/scrape.ts",
+    "build": "rimraf ./build && rollup -c",
     "start": "node build/src/index.js"
   },
   "type": "module",
@@ -15,10 +20,18 @@
   "dependencies": {
     "axios": "^1.6.2",
     "i18n-iso-countries": "^7.10.0",
+    "lodash-es": "^4.17.21",
     "pdfreader": "^3.0.2"
   },
   "devDependencies": {
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/lodash-es": "^4.17.12",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.43.0",
+    "rollup-plugin-dts": "^6.2.1",
     "ts-node": "^10.9.2",
+    "tslib": "^2.8.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3"
   },

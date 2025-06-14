@@ -11,6 +11,7 @@ interface Dataset {
 type DatasetByCountries = Record<string, Dataset>;
 
 export const remoteAreas: RemoteAreaItem[] = remoteAreasObj as unknown as RemoteAreaItem[];
+export default remoteAreas;
 
 function initForCountry(areas: typeof remoteAreas): Dataset {
   const zipCodes = new Set<string>();
@@ -74,7 +75,6 @@ function init() {
 
 const datasetByCountries = init();
 
-export default remoteAreas;
 
 export const isRemoteArea = (countryCode: string, zipOrCityOrState: string): boolean => {
   return isZipRemoteArea(countryCode, zipOrCityOrState) || isCityOrStateRemoteArea(countryCode, zipOrCityOrState);

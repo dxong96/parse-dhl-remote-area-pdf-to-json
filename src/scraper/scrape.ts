@@ -8,6 +8,7 @@ import {cityNames, stateNames} from "./countries.js";
 import {RemoteAreaItem, State} from "../types.js";
 import countries from "i18n-iso-countries";
 import {findLongestPrefix, isNumeric} from "../utils.js";
+import esMain from "es-main";
 
 // interfaces
 interface CurrentCountry {
@@ -15,18 +16,17 @@ interface CurrentCountry {
   iso: string | null;
 }
 
-// log config
-const logConfig = {
-  logCountryHeader: false,
-  logPage: true,
-  logUnmappedCountry: true,
-  logMatchCity: true,
-  logMatchState: true,
-  logMatchZipRange: true,
-  logMatchNoDigit: true,
-  logMatchNone: true,
-  logCurrentCell: false,
-  logOutput: false
+interface LogConfig {
+  logCountryHeader?: boolean;
+  logPage?: boolean;
+  logUnmappedCountry?: boolean;
+  logMatchCity?: boolean;
+  logMatchState?: boolean;
+  logMatchZipRange?: boolean;
+  logMatchNoDigit?: boolean;
+  logMatchNone?: boolean;
+  logCurrentCell?: boolean;
+  logOutput?: boolean;
 }
 
 // patterns
@@ -130,7 +130,13 @@ console.log('dhlPdfChanged', dhlPdfChanged);
 console.log('countriesPdfChanged', countriesPdfChanged);
 console.log('shouldRun', shouldRun);
 
-if (shouldRun) {
+interface DownloadAndParsePdfOpts {
+  logConfig?: LogConfig;
+  outputFileName?: string;
+  stateFileName?: string;
+}
+
+export async function downloadAndParsePdf({logConfig = {}, outputFileName = "output.json", stateFileName = "state.json"}: DownloadAndParsePdfOpts): Promise<void> {
   await new Promise<void>((resolve, reject) => {
     axios.get<Readable>(dhlPdfUrl, {
       responseType: 'stream',
@@ -151,104 +157,124 @@ if (shouldRun) {
         reject(e);
       });
   });
-  new PdfReader({}).parseFileItems("dhl_express_remote_areas_en.pdf", (err, item) => {
-    if (err) {
-      console.error("error:", err);
-    } else if (!item) {
-      console.warn("end of file");
-      const newState: State = {
-        countriesEtag: countriesPdfEtag,
-        dhlPdfEtag: dhlPdfEtag
-      };
-      writeFileSync("state.json", JSON.stringify(newState), {encoding: 'utf8'});
-      writeFileSync("output.json", JSON.stringify(output), {encoding: 'utf8'});
-      logConfig.logOutput && console.log(JSON.stringify(output));
-    } else if (item.page) {
-      foundRemoteCountryHeader = false;
-      logConfig.logPage && console.log('page:', item.page);
-    }
-    else if (item.text) {
-      if (item.text.includes('REMOTE AREA BY COUNTRY')) {
-        foundRemoteCountryHeader = true;
-        // do not process the header
-        return;
+
+  return new Promise<void>((resolve) => {
+    new PdfReader({}).parseFileItems("dhl_express_remote_areas_en.pdf", (err, item) => {
+      if (err) {
+        console.error("error:", err);
+      } else if (!item) {
+        console.warn("end of file");
+        const newState: State = {
+          countriesEtag: countriesPdfEtag,
+          dhlPdfEtag: dhlPdfEtag
+        };
+        writeFileSync(stateFileName, JSON.stringify(newState), {encoding: 'utf8'});
+        writeFileSync(outputFileName, JSON.stringify(output), {encoding: 'utf8'});
+        logConfig.logOutput && console.log(JSON.stringify(output));
+        resolve();
+      } else if (item.page) {
+        foundRemoteCountryHeader = false;
+        logConfig.logPage && console.log('page:', item.page);
       }
-
-      if (foundRemoteCountryHeader) {
-        if (textBlacklistUnderCountryHeader.some(pattern => pattern.test(item.text))) {
-          // skip line
+      else if (item.text) {
+        if (item.text.includes('REMOTE AREA BY COUNTRY')) {
+          foundRemoteCountryHeader = true;
+          // do not process the header
           return;
         }
 
-        if (/Remote Area List/.test(item.text)) {
-          previousItemIsRemoteAreaListLabel = true;
-          return;
-        }
-
-        if (previousItemIsRemoteAreaListLabel && /\d/.test(item.text)) {
-          // skip page number text
-          return;
-        }
-
-        if (!/\d/.test(item.text) && item.text === item.text.toUpperCase()) {
-          const iso = countries.getAlpha2Code(item.text, "en")
-            ?? fallbackMapping[item.text.trim()]
-            ?? null;
-          currentCountry = {
-            country: item.text,
-            iso
-          };
-          logConfig.logCountryHeader && console.log(`currentCountry map: ${item.text} to ${iso}`);
-          if (!iso) {
-            logConfig.logUnmappedCountry && console.log(`currentCountry not mapped: ${item.text}`);
+        if (foundRemoteCountryHeader) {
+          if (textBlacklistUnderCountryHeader.some(pattern => pattern.test(item.text))) {
+            // skip line
+            return;
           }
-          // do not process the country
-          return;
-        }
 
-        if (cityNames.has(item.text.trim().toLowerCase())) {
-          logConfig.logMatchCity&& console.log('match city name', item.text);
-          output.push({
-            ...currentCountry,
-            cityOrState: item.text.trim()
-          });
-        } else if (stateNames.has(item.text.trim().toLowerCase())) {
-          logConfig.logMatchState && console.log('match state name', item.text);
-          output.push({
-            ...currentCountry,
-            cityOrState: item.text.trim()
-          });
-        } else if (rangeZipPattern.test(item.text)) {
-          logConfig.logMatchZipRange && console.log('match zip range', item.text);
-          const tokens = item.text.split(rangeZipPattern);
-          if (isZipRangeValid(tokens)) {
-            output.push({
-              ...currentCountry,
-              zipRange: tokens
-            });
-          } else {
-            // most like city or state
+          if (/Remote Area List/.test(item.text)) {
+            previousItemIsRemoteAreaListLabel = true;
+            return;
+          }
+
+          if (previousItemIsRemoteAreaListLabel && /\d/.test(item.text)) {
+            // skip page number text
+            return;
+          }
+
+          if (!/\d/.test(item.text) && item.text === item.text.toUpperCase()) {
+            const iso = countries.getAlpha2Code(item.text, "en")
+              ?? fallbackMapping[item.text.trim()]
+              ?? null;
+            currentCountry = {
+              country: item.text,
+              iso
+            };
+            logConfig.logCountryHeader && console.log(`currentCountry map: ${item.text} to ${iso}`);
+            if (!iso) {
+              logConfig.logUnmappedCountry && console.log(`currentCountry not mapped: ${item.text}`);
+            }
+            // do not process the country
+            return;
+          }
+
+          if (cityNames.has(item.text.trim().toLowerCase())) {
+            logConfig.logMatchCity && console.log('match city name', item.text);
             output.push({
               ...currentCountry,
               cityOrState: item.text.trim()
             });
+          } else if (stateNames.has(item.text.trim().toLowerCase())) {
+            logConfig.logMatchState && console.log('match state name', item.text);
+            output.push({
+              ...currentCountry,
+              cityOrState: item.text.trim()
+            });
+          } else if (rangeZipPattern.test(item.text)) {
+            logConfig.logMatchZipRange && console.log('match zip range', item.text);
+            const tokens = item.text.split(rangeZipPattern);
+            if (isZipRangeValid(tokens)) {
+              output.push({
+                ...currentCountry,
+                zipRange: tokens
+              });
+            } else {
+              // most like city or state
+              output.push({
+                ...currentCountry,
+                cityOrState: item.text.trim()
+              });
+            }
+          } else if (!/\d/.test(item.text)) {
+            logConfig.logMatchNoDigit && console.log('no digit found, likely city or state', item.text);
+            output.push({
+              ...currentCountry,
+              cityOrState: item.text.trim()
+            });
+          } else {
+            logConfig.logMatchNone && console.log('no match found, assign to zip', item.text);
+            output.push({
+              ...currentCountry,
+              zip: item.text.trim()
+            });
           }
-        } else if (!/\d/.test(item.text)) {
-          logConfig.logMatchNoDigit && console.log('no digit found, likely city or state', item.text);
-          output.push({
-            ...currentCountry,
-            cityOrState: item.text.trim()
-          });
-        } else {
-          logConfig.logMatchNone && console.log('no match found, assign to zip', item.text);
-          output.push({
-            ...currentCountry,
-            zip: item.text.trim()
-          });
         }
+        previousItemIsRemoteAreaListLabel = false;
+        logConfig.logCurrentCell && console.log('text:', item.text);
       }
-      previousItemIsRemoteAreaListLabel = false;
-      logConfig.logCurrentCell && console.log('text:', item.text);
-    }
+    });
   });
+}
+
+if (esMain(import.meta) && shouldRun) {
+  const logConfig: LogConfig = {
+    logCountryHeader: false,
+    logPage: true,
+    logUnmappedCountry: true,
+    logMatchCity: true,
+    logMatchState: true,
+    logMatchZipRange: true,
+    logMatchNoDigit: true,
+    logMatchNone: true,
+    logCurrentCell: false,
+    logOutput: false
+  };
+  await downloadAndParsePdf({logConfig});
 }

@@ -1,16 +1,11 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es2017",
-    "module": "nodenext",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "rootDir": "./",
-    "outDir": "./build",
     "importHelpers": true,
     "declaration": true,
     "declarationDir": "./build/dts"
   },
   "include": [
-    "./src/**/*.ts",
+    "./src/**/*.ts"
   ]
 }

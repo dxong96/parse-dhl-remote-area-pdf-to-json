@@ -2,7 +2,7 @@ export function isNumeric(str: unknown) {
   if (typeof str === "number") return true;
   if (typeof str !== "string") return false; // we only process strings!
 
-  return !isNaN(parseFloat(str)); // ...and ensure strings of whitespace fail
+  return !isNaN(Number(str)); // ...and ensure strings of whitespace fail
 }
 
 // source: https://stackoverflow.com/a/68703218/19701373

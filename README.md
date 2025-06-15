@@ -13,8 +13,6 @@ interface RemoteAreaItem {
 }
 ```
 
-Last generated on 19/4/2025 GMT+8
-
 ## Installing
 
 ### Package manager
@@ -30,11 +28,32 @@ npm i parse-dhl-remote-area-pdf-to-json
 
 ### ESM
 ```ecmascript 6
-import countries from 'parse-dhl-remote-area-pdf-to-json';
+// Get exports
+import {remoteAreas, isRemoteArea, isZipRemoteArea, isCityOrStateRemoteArea} from 'parse-dhl-remote-area-pdf-to-json';
 ```
 
 ### CommonJS
 
 ```js
-const countries = require('parse-dhl-remote-area-pdf-to-json');
+const {remoteAreas, isRemoteArea, isZipRemoteArea, isCityOrStateRemoteArea} = require('parse-dhl-remote-area-pdf-to-json');
+```
+
+### remoteAreas - raw data from [output.json](https://github.com/dxong96/parse-dhl-remote-area-pdf-to-json/blob/master/output.json)
+
+### isRemoteArea
+```js
+// required parameters country iso 2-code and zip/state/city
+isRemoteArea("CN", "015000");
+```
+
+### isZipRemoteArea
+```js
+// required parameters country iso 2-code and zip only
+isZipRemoteArea("CN", "015000");
+```
+
+### isCityOrStateRemoteArea
+```js
+// required parameters country iso 2-code and city/state only
+isCityOrStateRemoteArea("CL", "Yumbel")
 ```

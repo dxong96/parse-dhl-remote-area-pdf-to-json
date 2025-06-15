@@ -10,9 +10,8 @@
   "types": "./build/index.d.ts",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "tsx src/scraper/scrape.ts",
     "build": "rimraf ./build && rollup -c",
-    "start": "node build/src/index.js"
+    "generate_output": "tsx src/scraper/scrape.ts"
   },
   "type": "module",
   "author": "",

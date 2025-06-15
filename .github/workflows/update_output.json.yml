@@ -28,8 +28,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm run build
-    - run: npm start
+    - run: npm run generate_output
 
     - name: Get current date
       id: date

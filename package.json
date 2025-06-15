@@ -1,19 +1,23 @@
 {
   "name": "parse-dhl-remote-area-pdf-to-json",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "module that provides json for dhl remote areas",
   "exports": {
-    "import": "./build/index.mjs",
-    "require": "./build/index.cjs"
+    "import": {
+      "default": "./build/index.mjs",
+      "types": "./build/index.d.ts"
+    },
+    "require": {
+      "default": "./build/index.cjs",
+      "types": "./build/index.d.ts"
+    }
   },
-  "types": "./build/index.d.ts",
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "build": "rimraf ./build && rollup -c",
     "generate_output": "tsx src/scraper/scrape.ts"
   },
   "type": "module",
-  "author": "",
   "license": "ISC",
   "dependencies": {
     "lodash-es": "^4.17.21"

@@ -29,5 +29,5 @@ jobs:
           mkdir publish
           cp README.md package.json build/* publish
       - name: publish package
-        worker-directory: ./publish
+        working-directory: ./publish
         run: npm publish

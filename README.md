@@ -27,7 +27,7 @@ npm i parse-dhl-remote-area-pdf-to-json
 ## Usage
 
 ### ESM
-```ecmascript 6
+```js
 // Get exports
 import {remoteAreas, isRemoteArea, isZipRemoteArea, isCityOrStateRemoteArea} from 'parse-dhl-remote-area-pdf-to-json';
 ```

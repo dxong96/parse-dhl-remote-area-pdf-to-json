@@ -1,14 +1,13 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Generate output workflow
+name: Node.js CI
 
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron:  '0 0 1,16 * *'
-  workflow_dispatch:
-
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   build:
@@ -17,38 +16,16 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build
-    - run: npm start
-
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        add-paths: |
-            output.json
-            state.json
-        commit-message: Data source updated generating new output
-        committer: dxong96 <ongdexing@gmail.com>
-        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-        signoff: true
-        branch: auto/update_${{ env.date }}
-        delete-branch: true
-        title: 'Check new update ${{ env.date }}'
-        labels: |
-          exports
-          automated
-        reviewers: dxong96
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      - run: npm ci
+      - run: npm test
+      - run: npm run build --if-present

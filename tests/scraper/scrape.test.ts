@@ -2,6 +2,7 @@ import fs from "node:fs";
 import {z} from "zod";
 import {RemoteAreaItem} from "../../src/types.js";
 import {downloadAndParsePdf} from "../../src/scraper/scrape.js";
+import {findLongestPrefix, isNumeric} from "../../src/utils.js";
 
 const OUTPUT_FILE_NAME = "tests/output.json";
 const STATE_FILE_NAME = "tests/state.json";
@@ -90,7 +91,31 @@ describe("scraper", () => {
           } satisfies Partial<RemoteAreaItem>),
         ],
       ));
+    });
 
+    test("all zip range can be iterated", () => {
+      let hasInvalidZipRange = false;
+      for (const remoteArea of remoteAreas) {
+        if (!remoteArea.zipRange) {
+          continue;
+        }
+
+        if (isNumeric(remoteArea.zipRange[0]) && isNumeric(remoteArea.zipRange[1])) {
+          continue;
+        }
+        const prefix = findLongestPrefix(remoteArea.zipRange);
+        if (prefix) {
+          if (isNumeric(remoteArea.zipRange[0].substring(prefix.length)) &&
+            isNumeric(remoteArea.zipRange[1].substring(prefix.length))) {
+            continue;
+          }
+        }
+
+        hasInvalidZipRange = true;
+        console.warn('zip range is invalid', remoteArea.zipRange);
+      }
+
+      expect(hasInvalidZipRange).toBe(false);
     });
   });
 });

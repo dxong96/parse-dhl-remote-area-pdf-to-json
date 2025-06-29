@@ -3,7 +3,6 @@
 
 The output is a list of the following interface.
 
-
 ```typescript
 interface RemoteAreaItem {
   country: string;
@@ -11,7 +10,13 @@ interface RemoteAreaItem {
   zipRange?: string[];
   zip?: string;
 }
+
+type Output = RemoteAreaItem[]
 ```
+
+### ‼️Note‼️
+When using in typescript with module `"CommonJS"`, at least typescript version 4.7 must be used in order to properly 
+resolve the module.
 
 ## Installing
 

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "importHelpers": true,
     "declaration": true,
-    "declarationDir": "./build/dts"
+    "declarationDir": "./build/types/mjs"
   },
   "include": [
     "./src/**/*.ts"

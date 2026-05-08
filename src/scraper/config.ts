@@ -1,2 +1,3 @@
 export const countriesStateCityUrl = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/refs/heads/master/json/countries%2Bstates%2Bcities.json";
-export const dhlPdfUrl = "https://mydhl.express.dhl/content/dam/downloads/global/en/remote-areas/dhl_express_remote_areas_en.pdf.coredownload.pdf";
+export const dhlPdfUrl = "https://mcusercontent.com/6366af3aac3d03b507e576f50/files/458b48d0-fa5f-0692-8355-9ab1a00535c8/dhl_express_remote_areas_en_2025_K1043388.pdf";
+export const dhlXlsxUrl = "https://www.dhl.com/content/dam/dhl/global/dhl-express/documents/docs/dhl-express-remote-area-surcharge-locations.xlsx";

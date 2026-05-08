@@ -71,6 +71,7 @@ interface City {
 const countries = await axios.get<Country[]>(countriesStateCityUrl)
   .then(res => res.data);
 
+const _countryNames = new Set<string>();
 const _stateNames = new Set<string>();
 const _cityNames = new Set<string>();
 
@@ -78,6 +79,7 @@ for (const country of countries) {
   if (country.states.length === 0) {
     continue;
   }
+  _countryNames.add(country.name.toLowerCase());
 
   for (const state of country.states) {
     _stateNames.add(state.name.toLowerCase());
@@ -92,5 +94,10 @@ for (const country of countries) {
   }
 }
 
+export const countryNames = _countryNames;
 export const stateNames = _stateNames;
 export const cityNames = _cityNames;
+export const countryMap = countries.reduce((acc, country) => {
+  acc[country.iso2] = country;
+  return acc;
+}, {} as Record<string, Country>);

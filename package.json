@@ -15,7 +15,8 @@
   "scripts": {
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "build": "rimraf ./build && rollup -c",
-    "generate_output": "tsx src/scraper/scrape.ts"
+    "generate_output": "tsx src/scraper/scrape.ts",
+    "generate_output_xlsx": "tsx src/scraper/scrape_xlsx.ts"
   },
   "license": "ISC",
   "dependencies": {
@@ -41,7 +42,8 @@
     "tslib": "^2.8.1",
     "tsx": "^4.7.1",
     "typescript": "^5.3.3",
-    "zod": "^3.25.64"
+    "zod": "^3.25.64",
+    "xlsx": "^0.18.5"
   },
   "repository": {
     "type": "git",

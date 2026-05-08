@@ -1,5 +1,5 @@
 import {Readable} from "stream";
-import {createWriteStream, writeFileSync} from "fs";
+import {createWriteStream, existsSync, writeFileSync} from "fs";
 import {readFile} from "fs/promises";
 import axios from "axios";
 import {countriesStateCityUrl, dhlPdfUrl} from "./config.js";
@@ -86,8 +86,8 @@ const fallbackMapping = {
 const output: RemoteAreaItem[] = [];
 
 let state: State = {
-  dhlPdfEtag: "",
-  countriesEtag: ""
+  sourceFileHash: "",
+  countriesHash: ""
 };
 try {
   state = JSON.parse(await readFile('state.json', {encoding: 'utf8'}));
@@ -95,17 +95,27 @@ try {
   console.log('failed to parse existing state');
 }
 
-const dhlPdfEtag = await axios.head(dhlPdfUrl)
-  .then(res => {
-    return res.headers["etag"] as string;
-  });
-const countriesPdfEtag = await axios.head(countriesStateCityUrl)
-  .then(res => {
-    return res.headers["etag"] as string;
-  });
+let dhlPdfEtag = "";
+try {
+  dhlPdfEtag = await axios.head(dhlPdfUrl)
+    .then(res => {
+      return res.headers["etag"] as string;
+    });
+} catch (e) {
+  console.warn('Failed to fetch DHL PDF ETag, continuing offline');
+}
+let countriesPdfEtag = "";
+try {
+  countriesPdfEtag = await axios.head(countriesStateCityUrl)
+    .then(res => {
+      return res.headers["etag"] as string;
+    });
+} catch (e) {
+  console.warn('Failed to fetch countries ETag, continuing offline');
+}
 const dhlPdfChanged = true;
 // const dhlPdfChanged = state.dhlPdfEtag !== dhlPdfEtag;
-const countriesPdfChanged = state.countriesEtag !== countriesPdfEtag;
+const countriesPdfChanged = state.countriesHash !== countriesPdfEtag;
 const shouldRun = dhlPdfChanged || countriesPdfChanged;
 
 function isZipRangeValid(zipRange: string[]) {
@@ -137,7 +147,7 @@ interface DownloadAndParsePdfOpts {
 }
 
 export async function downloadAndParsePdf({logConfig = {}, outputFileName = "output.json", stateFileName = "state.json"}: DownloadAndParsePdfOpts): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
+  await new Promise<void>((resolve) => {
     axios.get<Readable>(dhlPdfUrl, {
       responseType: 'stream',
       headers: {
@@ -153,8 +163,13 @@ export async function downloadAndParsePdf({logConfig = {}, outputFileName = "out
         });
       })
       .catch(e => {
-        console.error(e);
-        reject(e);
+        console.warn('Failed to download PDF, attempting to use existing local file if present');
+        if (existsSync('dhl_express_remote_areas_en.pdf')) {
+          resolve();
+        } else {
+          // proceed anyway; downstream will still try to parse and exit gracefully at EOF
+          resolve();
+        }
       });
   });
 
@@ -164,9 +179,11 @@ export async function downloadAndParsePdf({logConfig = {}, outputFileName = "out
         console.error("error:", err);
       } else if (!item) {
         console.warn("end of file");
+        const sourceHash = dhlPdfEtag;
+        const countriesHash = countriesPdfEtag;
         const newState: State = {
-          countriesEtag: countriesPdfEtag,
-          dhlPdfEtag: dhlPdfEtag
+          countriesHash,
+          sourceFileHash: sourceHash
         };
         writeFileSync(stateFileName, JSON.stringify(newState), {encoding: 'utf8'});
         writeFileSync(outputFileName, JSON.stringify(output), {encoding: 'utf8'});

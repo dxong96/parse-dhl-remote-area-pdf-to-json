@@ -46,8 +46,8 @@ describe("scraper", () => {
 
   test("state.json should have the correct shape", () => {
     const stateSchema = z.object({
-      dhlPdfEtag: z.string(),
-      countriesEtag: z.string(),
+      sourceFileHash: z.string(),
+      countriesHash: z.string(),
     });
     const result = stateSchema.safeParse(JSON.parse(fs.readFileSync(STATE_FILE_NAME, "utf8")));
     expect(result.success).toEqual(true);

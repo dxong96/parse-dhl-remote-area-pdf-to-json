@@ -1,6 +1,6 @@
 export interface State {
-  dhlPdfEtag: string;
-  countriesEtag: string;
+  sourceFileHash: string;
+  countriesHash: string;
 }
 
 export interface RemoteAreaItem {

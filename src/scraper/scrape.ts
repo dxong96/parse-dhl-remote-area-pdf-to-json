@@ -99,8 +99,9 @@ let dhlPdfEtag = "";
 try {
   dhlPdfEtag = await axios.head(dhlPdfUrl)
     .then(res => {
-      return res.headers["etag"] as string;
+      return res.headers["etag"] ?? Date.now().toString();
     });
+  console.log('dhlPdfEtag', dhlPdfEtag);
 } catch (e) {
   console.warn('Failed to fetch DHL PDF ETag, continuing offline');
 }

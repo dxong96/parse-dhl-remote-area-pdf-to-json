@@ -1,5 +1,8 @@
 # DHL remote area
-`output.json` is the file that is converted from https://mydhl.express.dhl/content/dam/downloads/global/en/remote-areas/dhl_express_remote_areas_en.pdf.coredownload.pdf
+`output.json` is the file that is converted from https://www.dhl.com/content/dam/dhl/global/dhl-express/documents/docs/dhl-express-remote-area-surcharge-locations.xlsx
+
+It used to be a pdf but the pdf was no longer published only the xlsx version is still available.
+I created this because the API to check remote area is very slow, with this library you can check if a zip/state/city is remote area locally.
 
 The output is a list of the following interface.
 

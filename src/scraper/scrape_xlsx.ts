@@ -1,7 +1,7 @@
 import {writeFileSync, readFileSync} from "fs";
 import {createHash} from "crypto";
 import esMain from "es-main";
-import XLSX from "xlsx";
+import XLSX from "@e965/xlsx";
 import axios from "axios";
 import countries from "i18n-iso-countries";
 import {RemoteAreaItem, State} from "../types.js";

@@ -18,7 +18,6 @@ describe("xlsx scraper", () => {
     await downloadAndParseXlsx({
       outputFileName: OUTPUT_FILE_NAME,
       stateFileName: STATE_FILE_NAME,
-      xlsxPath: LOCAL_XLSX,
     });
   }, 60000);
 

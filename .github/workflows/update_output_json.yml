@@ -29,6 +29,9 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run generate_output_xlsx
+    - run: |
+        mv output2.json output.json
+        mv state2.json state.json
 
     - name: Get current date
       id: date

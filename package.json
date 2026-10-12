@@ -1,6 +1,6 @@
 {
   "name": "parse-dhl-remote-area-pdf-to-json",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "module that provides json for dhl remote areas",
   "type": "module",
   "module": "./build/index.mjs",
